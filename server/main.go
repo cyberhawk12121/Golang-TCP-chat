@@ -25,7 +25,7 @@ func broadcastMessage(conn net.Conn) {
 		reader := bufio.NewReader(conn)
 		message, err := reader.ReadString('\n')
 		if err != nil {
-			break;
+			break
 		}
 		// loop over all the connections
 		// send message to those connections
@@ -52,7 +52,7 @@ func main() {
 			logFatal(err)
 
 			openConnections[conn] = true
-			//BUT THE CONNECTION "conn" is scoped withing this goroutine. SO to make it available outside
+			// To make it available outside the scope of this routine
 			// we need to pass it to a channel
 			newConnection <- conn
 		}
