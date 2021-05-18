@@ -21,7 +21,7 @@ func logFatal(err error) {
 }
 
 func broadcastMessage(conn net.Conn) {
-	{
+	for {
 		reader := bufio.NewReader(conn)
 		message, err := reader.ReadString('\n')
 		if err != nil {
@@ -30,12 +30,13 @@ func broadcastMessage(conn net.Conn) {
 		// loop over all the connections
 		// send message to those connections
 		//except the connections that send the messages
-		for _, item := range openConnections {
+		for item := range openConnections {
 			if item != conn {
 				item.Write([]byte(message))
 			}
 		}
 	}
+	deadConnection <- conn
 }
 
 func main() {
@@ -68,8 +69,16 @@ func main() {
 		select {
 		case conn := <-newConnection:
 			//Invoke Broadcast()
-		case conn <- deadConnection:
+			go broadcastMessage(conn)
+		case conn := <-deadConnection:
 			// remove the connection from the map
+			for item := range openConnections {
+				if item == conn {
+					break
+				}
+			}
+			delete(openConnections, conn)
 		}
 	}
+
 }
